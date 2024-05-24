@@ -1,55 +1,89 @@
+ ///Lets code
 import { SurveyCreatorComponent, SurveyCreator } from "survey-creator-react";
+import * as Survey from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 import "survey-creator-core/survey-creator-core.min.css";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import axios from "axios";
+import {toast} from "react-hot-toast";
+
 const creatorOptions = {
-  showLogicTab: false,
+  showLogicTab: true,
   isAutoSave: true
 };
 
-const defaultJson = {
-  pages: [{
-    name: "Name",
-    elements: [{
-      name: "FirstName",
-      title: "Enter your first name:",
-      type: "text"
-    }, {
-      name: "LastName",
-      title: "Enter your last name:",
-      type: "text"
-    }]
-  }]
-};
-
 export default function DynamicFormBuilder() {
-    const creator = useRef(new SurveyCreator(creatorOptions));
-    //console.log("Creator", creator)
-    //console.log("Creator current text", creator.current.text)
+  const [surveyJson, setSurveyJson] = useState({
+   
+    pages:[
+      {
+        elements: [
+          {
+            type: "text",
+            name: "Name",
+            title: "Full Name",
+            isRequired: true
+          },
+          {
+            type: "text",
+            name: "email",
+            title: "Email",
+            isRequired: true
+          },
+          {
+            type: "rating",
+            name: "satisfaction",
+            title: "How satisfied are you with our product?",
+            isRequired: true,
+            rateMin: 1,
+            rateMax: 5
+          },
+          {
+            type: "comment",
+            name: "feedback",
+            title: "Please provide your feedback",
+            isRequired: true
+          }
+        ]
+      }
+    ]
+  });
+
+  const creator = useRef(new SurveyCreator(creatorOptions));
+
   useEffect(() => {
-    creator.current.text = window.localStorage.getItem("survey-json") || JSON.stringify(defaultJson);
-
-    creator.current.saveSurveyFunc = async (saveNo, callback) => {
-      await fetch("http://localhost:5000/saveForm", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: creator.current.text
-      })
-      .then(res => res.json())
-      .then(data => {
-        callback(saveNo, true);
-      })
-      .catch(error => {
-        console.error('Error while saving form:', error);
-        callback(saveNo, false);
-      });
+    const saveSurveyFuncHandler = (surveyJson) => {
+      setSurveyJson(JSON.parse(surveyJson));
     };
+    console.log("Get JSON",creator.current.saveSurveyFunc);
+    creator.current.saveSurveyFunc = saveSurveyFuncHandler;
+    console.log("Get JSON",creator.current.saveSurveyFunc);
 
+    return () => {
+      creator.current.saveSurveyFunc = null;
+    };
   }, []);
 
+  const handleComplete = (sender) => {
+    console.log("Sending survey data...");
+    axios.post("http://localhost:5000/api/survey", sender.data)
+      .then(response => {
+        toast.success("Form results saved successfully!");
+      })
+      .catch(error => {
+        toast.error("Error while saving form");
+        console.error("There was an error saving the form results!", error);
+      });
+  };
+
+  const survey = new Survey.Model(surveyJson);
+  survey.onComplete.add(handleComplete);
+
   return (
-    <SurveyCreatorComponent creator={creator.current} />
+    <div>
+      <h1 style={{ textAlign: 'center', color:'green' }}> Feedback Form 📝</h1>
+        <Survey.Survey model={survey} />
+      <SurveyCreatorComponent creator={creator.current} />
+    </div>
   );
 }
