@@ -12,17 +12,36 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 // MySQL connection
-const db = mysql.createConnection({
-  host: process.env.HOST,
-  user:process.env.USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+// const db = mysql.createConnection({
+//   host: process.env.HOST,
+//   user:process.env.USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME
+// });
+
+// db.connect((err) => {
+//   if (err) {
+//     console.error('Error connecting to the database:', err.stack);
+//     return;
+//   }
+//   console.log('Connected to the database with thread ID:', db);
+// });
+
+
+const uri = 'mysql://uxpilybsy6irnnku:NxUC0zgPOXVjxuSksmZJ@bvhgs9bzuafyfodjkuiv-mysql.services.clever-cloud.com:3306/bvhgs9bzuafyfodjkuiv'; // Replace with your actual connection URI
+
+const db = mysql.createConnection(uri);
+
+db.connect((err) => {
+  if (err) {
+    console.error('Error connecting to the database:', err.stack);
+    return;
+  }
+  console.log('Connected to the database with thread ID:', db.threadId);
 });
-
-
 // API endpoint to handle survey submission
 app.post('/api/survey', (req, res) => {
-  console.log("Inside server")
+ // console.log("Inside server")
   const { Name, email, satisfaction, feedback } = req.body;
     // console.log(Name,email, satisfaction, feedback);
 
