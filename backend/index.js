@@ -28,9 +28,9 @@ app.use(bodyParser.json());
 // });
 
 
-const uri = 'mysql://uxpilybsy6irnnku:NxUC0zgPOXVjxuSksmZJ@bvhgs9bzuafyfodjkuiv-mysql.services.clever-cloud.com:3306/bvhgs9bzuafyfodjkuiv'; // Replace with your actual connection URI
 
-const db = mysql.createConnection(uri);
+
+const db = mysql.createConnection(process.env.CONNECTION_URI);
 
 db.connect((err) => {
   if (err) {
