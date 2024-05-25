@@ -66,8 +66,8 @@ export default function DynamicFormBuilder() {
 
   const handleComplete = (sender) => {
     console.log("Sending survey data...");
-    // axios.post("http://localhost:5000/api/survey", sender.data)
-    axios.post("https://formbuilder-chni.onrender.com/api/survey", sender.data)
+    axios.post("http://localhost:5000/api/survey", sender.data)
+    //axios.post("https://formbuilder-chni.onrender.com/api/survey", sender.data)
       .then(response => {
         toast.success("Form results saved successfully!");
       })
